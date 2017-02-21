@@ -21,6 +21,12 @@
           shape-rendering: crispEdges;
         }
 
+        .axis text {
+          stroke: rgb(215,215,215);
+          shape-rendering: crispEdges;
+
+        }
+
         .y.axis path {
           fill: none;
           stroke: #000;
@@ -37,18 +43,53 @@
           fill: none;
         }
 
+        .chart-row {
+            background-color: rgb(85,85,85);
+            color:rgb(215,215,215);
+
+        }
+
+
         .legend-container {
             overflow-y: scroll;
             height:500px;
             padding:1rem;
+            background-color: rgb(85,85,85);
+            color:rgb(215,215,215);
+        }
+
+        .form-check {
+            cursor:pointer;
+             margin-bottom: 0rem;
+            padding: .25rem 0rem;
+            border:1px solid;
+            border-color: rgb(100,100,100);
+            border-top:0px;
+        }
+        .form-check:first-child {
+            border-radius:2px 2px 0px 0px;
+            border-top:1px solid rgb(100,100,100);
+        }
+        .form-check:last-child {
+            border-radius:0px 0px 2px 2px;
+        }
+
+        .form-check-label {
+            padding-left: .75rem;
         }
 
         .color-marker {
+
             width: .6rem;
-            position: relative;
+            position: absolute;
+            left:0px;
+            top:0px;
+            bottom:0px;
             display: inline-block;
-            height: 1rem;
-            margin-right: .5rem;
+        }
+
+        .filter-button {
+            margin-left: 1.1rem;
         }
 
     </style>
@@ -58,7 +99,7 @@
         <div class="row">
             <div class="nav-container col-md-12"></div>
         </div>
-        <div class="row">
+        <div class="row chart-row">
             <div class="chart-container col-md-9"></div>
             <div id='legend' class="legend-container col-md-3"></div>
         </div>
