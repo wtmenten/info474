@@ -147,7 +147,14 @@
 
             var inputGroup = d3.select(".legend-container").selectAll('.form-check').data(d3.keys(data[0]).filter(function(d){return d!= "Date"}))
                 .enter()
-                    .append('div').attr('class', 'form-check clearfix');
+                    .append('div')
+                    .attr('class', 'form-check clearfix')
+                    .attr('value', function (d) {return d;})
+                    .on('click', function(){ // makes the whole element toggleable
+                        var btn = d3.select(this).select('.filter-button');
+                        btn.attr('checked', function (d, i) {return btn.attr('checked') ? null :true});
+                        btn.dispatch('change');
+                    });
 
             inputGroup.append('div').attr('class', 'color-marker').style('background-color',function(d){
                 return color(d);
@@ -196,7 +203,6 @@
                 return legendState[key];
             });
             var filteredData = [];
-            console.log(activeColumns);
             data.map(function(rowObj){
                 var retObj = {};
                 activeColumns.map(function(dataKey) {
@@ -245,7 +251,6 @@
             x.domain(d3.extent(data, function(d) { return +d.Date; }));
             y.domain([d3.min(sources, function(c) { return d3.min(c.values, function(v) { return +v.val; }); }),
                       d3.max(sources, function(c) { return d3.max(c.values, function(v) { return +v.val; }); }) ]);
-            console.log(y.domain());
             x2.domain(x.domain());
             y2.domain(y.domain());
 
@@ -301,7 +306,6 @@
             x.domain(d3.extent(data, function(d) { return +d.Date; }));
             y.domain([d3.min(sources, function(c) { return d3.min(c.values, function(v) { return +v.val; }); }),
                       d3.max(sources, function(c) { return d3.max(c.values, function(v) { return +v.val; }); }) ]);
-            console.log(y.domain());
             x2.domain(x.domain());
             y2.domain(y.domain());
 
@@ -315,7 +319,7 @@
                 .append("path")
                 .attr("class","line")
                 .merge(focuslineGroups.selectAll('path.line'))
-                .attr("d", function(d) { console.log(d);return line(d.values); })
+                .attr("d", function(d) { return line(d.values); })
                 .style("stroke", function(d) {return color(d.name);})
                 .attr("clip-path", "url(#clip)");
             focuslineGroups.exit().remove();
