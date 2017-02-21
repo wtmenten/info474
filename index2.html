@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <title>Assignment4</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
 
     <style>
 
@@ -34,142 +37,330 @@
           fill: none;
         }
 
+        .legend-container {
+            overflow-y: scroll;
+            height:500px;
+            padding:1rem;
+        }
+
+        .color-marker {
+            width: .6rem;
+            position: relative;
+            display: inline-block;
+            height: 1rem;
+            margin-right: .5rem;
+        }
+
     </style>
 </head>
 <body>
+    <div class="container-fluid d3-container">
+        <div class="row">
+            <div class="nav-container col-md-12"></div>
+        </div>
+        <div class="row">
+            <div class="chart-container col-md-9"></div>
+            <div id='legend' class="legend-container col-md-3"></div>
+        </div>
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script>
+    $(function(){
+        var ccwidth = $(".chart-container").width();
+        var ccheight = $(".chart-container").height();
+        var ccheight = ccheight > 500 ? ccheight : 500;
+        var margin = {top: 10, right: 10, bottom: 100, left: 80},
+        margin2 = {top: 430, right: 10, bottom: 20, left: 80},
+        width = ccwidth - margin.left - margin.right,
+        height = ccheight - margin.top - margin.bottom,
+        height2 = ccheight - margin2.top - margin2.bottom;
 
-    var margin = {top: 10, right: 10, bottom: 100, left: 40},
-        margin2 = {top: 430, right: 10, bottom: 20, left: 40},
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom,
-        height2 = 500 - margin2.top - margin2.bottom;
+        var color = d3.scaleOrdinal(d3.schemeCategory10);
 
-    var color = d3.scaleOrdinal(d3.schemeCategory10);
+        var parseDate = d3.timeParse("%Y%m");
 
-    var parseDate = d3.timeParse("%Y%m");
+        var x = d3.scaleTime().range([0, width]),
+            x2 = d3.scaleTime().range([0, width]),
+            y = d3.scaleLinear().range([height, 0]),
+            y2 = d3.scaleLinear().range([height2, 0]);
 
-    var x = d3.scaleTime().range([0, width]),
-        x2 = d3.scaleTime().range([0, width]),
-        y = d3.scaleLinear().range([height, 0]),
-        y2 = d3.scaleLinear().range([height2, 0]);
+        var xAxis = d3.axisBottom(x).tickFormat(d3.format('.0f')),
+            xAxis2 = d3.axisBottom(x2).tickFormat(d3.format('.0f')),
+            yAxis = d3.axisLeft(y).tickFormat(d3.format('.2f')).ticks(10);
 
-    var xAxis = d3.axisBottom(x).tickFormat(d3.format('.0f')),
-        xAxis2 = d3.axisBottom(x2).tickFormat(d3.format('.0f')),
-        yAxis = d3.axisLeft(y).tickFormat(d3.format('.2f')).ticks(10);
+        var brush = d3.brushX(x2)
+            .on("brush", brush)
+            .on("end", brush); // for checking emptyness
 
-    var brush = d3.brushX(x2)
-        .on("brush", brush);
+        var line = d3.line()
+            .defined(function(d) { return !isNaN(+d.val); })
+            .x(function(d) { return x(+d.Date); })
+            .y(function(d) { return y(+d.val); })
+            .curve(d3.curveLinear);
 
-    var line = d3.line()
-        .defined(function(d) { return !isNaN(+d.val); })
-        .x(function(d) { return x(+d.Date); })
-        .y(function(d) { return y(+d.val); })
-        .curve(d3.curveLinear);
-
-    var line2 = d3.line()
-        .defined(function(d) { return !isNaN(+d.val); })
-        .x(function(d) {return x2(+d.Date); })
-        .y(function(d) {return y2(+d.val); })
-        .curve(d3.curveLinear);
+        var line2 = d3.line()
+            .defined(function(d) { return !isNaN(+d.val); })
+            .x(function(d) {return x2(+d.Date); })
+            .y(function(d) {return y2(+d.val); })
+            .curve(d3.curveLinear);
 
 
-    var svg = d3.select("body").append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom);
+        var svg = d3.select(".chart-container").append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom);
 
-    svg.append("defs").append("clipPath")
-        .attr("id", "clip")
-      .append("rect")
-        .attr("width", width)
-        .attr("height", height);
+        svg.append("defs").append("clipPath")
+            .attr("id", "clip")
+          .append("rect")
+            .attr("width", width)
+            .attr("height", height);
 
-    var focus = svg.append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var focus = svg.append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var context = svg.append("g")
-      .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+        var context = svg.append("g")
+          .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
-    d3.csv("dataframe.csv", function(error, data) {
 
-//      color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date" || key.includes("T69"); }));
-      color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Date" && ( key.includes('Expected') || key.includes('Predicted')); }));
-
-        data.forEach(function(d) {
-//          d.Date = parseDate(d.Date);
-          d.Date = +d.Date;
+        d3.csv("dataframe.csv", function(error, source) {
+            drawLegend(source);
+//            initLineChart(source);
         });
 
-      var sources = color.domain().map(function(name) {
-          return {
-            name: name,
-            values: data.map(function(d) {
-              return {Date: +d.Date, val: +d[name]};
-            })
-          };
-        });
-
-        x.domain(d3.extent(data, function(d) { return +d.Date; }));
-        y.domain([d3.min(sources, function(c) { return d3.min(c.values, function(v) { return +v.val; }); }),
-                  d3.max(sources, function(c) { return d3.max(c.values, function(v) { return +v.val; }); }) ]);
-        console.log(y.domain());
-        x2.domain(x.domain());
-        y2.domain(y.domain());
-
-        var focuslineGroups = focus.selectAll("g")
-            .data(sources)
-          .enter().append("g");
-
-        var focuslines = focuslineGroups.append("path")
-            .attr("class","line")
-            .attr("d", function(d) { return line(d.values); })
-            .style("stroke", function(d) {return color(d.name);})
-            .attr("clip-path", "url(#clip)");
-
-        focus.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis);
-
-        focus.append("g")
-            .attr("class", "y axis")
-            .call(yAxis);
-
-        var contextlineGroups = context.selectAll("g")
-            .data(sources)
-          .enter().append("g");
-
-        var contextLines = contextlineGroups.append("path")
-            .attr("class", "line")
-            .attr("d", function(d) { return line2(d.values); })
-            .style("stroke", function(d) {return color(d.name);})
-            .attr("clip-path", "url(#clip)");
-
-        context.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height2 + ")")
-            .call(xAxis2);
-
-        context.append("g")
-            .attr("class", "x brush")
-            .call(brush)
-          .selectAll("rect")
-            .attr("y", -6)
-            .attr("height", height2 + 7);
 
 
-    });
+        function drawLegend(data, callback) {
+            var legendwidth = $(".legend-container").width();
+//            console.log(d3.keys(data[0]));
+//            console.log(data);
+            var legendState = {};
+            d3.keys(data[0]).map(function (d,i) {
+                var initConditions = d=="Date";
+                legendState[d] = initConditions ? true : null;
+            });
 
-    function brush() {
-      var selection = d3.event.selection;
-//      console.log(selection);
-      x.domain(selection.map(x2.invert, x2));
-      focus.selectAll("path.line").attr("d",  function(d) {return line(d.values)});
+            color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Date"; }));
 
-      focus.select(".x.axis").call(xAxis);
-      focus.select(".y.axis").call(yAxis);
-    }
+            var inputGroup = d3.select(".legend-container").selectAll('.form-check').data(d3.keys(data[0]).filter(function(d){return d!= "Date"}))
+                .enter()
+                    .append('div').attr('class', 'form-check clearfix');
+
+            inputGroup.append('div').attr('class', 'color-marker').style('background-color',function(d){
+                return color(d);
+            });
+
+            inputGroup.append('input')
+                    .attr('type', 'checkbox')
+                    .attr('class', 'filter-button clearfix')
+                    .attr('value', function (d) {return d;})
+                    .attr('checked', function (d, i) {return legendState[d];})
+                    .on("change", function() {
+                        console.log('saw filter change');
+                        console.log(legendState);
+                        legendState[this.value] = this.checked ? true : null;
+
+
+                        var activeColumns = d3.keys(data[0]).filter(function(key) {
+                            if (key == this.value) {
+                                return this.checked ? true : null;
+                            } else {
+                                return legendState[key];
+                            }
+                        });
+                        var filteredData = [];
+                        console.log("current selected cols: " + activeColumns.toString());
+                        data.map(function(rowObj){
+                            var retObj = {};
+                            activeColumns.map(function(dataKey) {
+                               retObj[dataKey] = rowObj[dataKey];
+                            });
+                            filteredData.push(retObj);
+                        });
+
+                        updateLineChart(filteredData);
+
+                    });
+
+            inputGroup.append('span').attr('class', 'form-check-label')
+                    .text(function (d) {return d;});
+
+            if (callback) {
+                callback();
+            }
+
+            var activeColumns = d3.keys(data[0]).filter(function(key) {
+                return legendState[key];
+            });
+            var filteredData = [];
+            console.log(activeColumns);
+            data.map(function(rowObj){
+                var retObj = {};
+                activeColumns.map(function(dataKey) {
+                   retObj[dataKey] = rowObj[dataKey];
+                });
+                filteredData.push(retObj);
+            });
+
+            initLineChart(filteredData);
+
+//            dofilter();
+//
+//            function doFilter(newVal, newState) {
+//
+//                var activeColumns = d3.keys(data[0]).filter(function(key) { return legendState[key] });
+//                var filteredData = [];
+//                console.log(activeColumns);
+//                data.map(function(rowObj){
+//                    var retObj = {};
+//                    activeColumns.map(function(dataKey) {
+//                       retObj[dataKey] = rowObj[dataKey];
+//                    });
+//                    filteredData.push(retObj);
+//                });
+//
+//                updateLineChart(filteredData);
+//
+//            }
+        }
+
+        function updateLineChart(filteredData) {
+            drawLineChart(filteredData);
+        }
+
+        function initLineChart(data) {
+
+            var sources = d3.keys(data[0]).filter(function(key) { return key !== "Date"; }).map(function(name) {
+              return {
+                name: name,
+                values: data.map(function(d) {
+                  return {Date: +d.Date, val: +d[name]};
+                })
+              };
+            });
+
+            x.domain(d3.extent(data, function(d) { return +d.Date; }));
+            y.domain([d3.min(sources, function(c) { return d3.min(c.values, function(v) { return +v.val; }); }),
+                      d3.max(sources, function(c) { return d3.max(c.values, function(v) { return +v.val; }); }) ]);
+            console.log(y.domain());
+            x2.domain(x.domain());
+            y2.domain(y.domain());
+
+            focus.append('g').attr('class','plot-area');
+            focus.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height + ")")
+                .call(xAxis);
+
+            focus.append("g")
+                .attr("class", "y axis")
+                .call(yAxis);
+
+            context.append("g")
+                .attr("class", "x axis")
+                .attr("transform", "translate(0," + height2 + ")")
+                .call(xAxis2);
+
+            context.append('g').attr('class','plot-area');
+
+
+            context.append("g")
+                .attr("class", "x brush")
+                .call(brush)
+              .selectAll("rect")
+                .attr("y", -6)
+                .attr("height", height2 + 7);
+
+
+            drawLineChart(data);
+        }
+
+
+        // draws the line chart view
+        function drawLineChart(data, callback) {
+            console.log('doing chart');
+            console.log(data);
+
+            data.forEach(function(d) {
+            //          d.Date = parseDate(d.Date);
+              d.Date = +d.Date;
+            });
+
+            var sources = d3.keys(data[0]).filter(function(key) { return key !== "Date"; }).map(function(name) {
+              return {
+                name: name,
+                values: data.map(function(d) {
+                  return {Date: +d.Date, val: +d[name]};
+                })
+              };
+            });
+
+            x.domain(d3.extent(data, function(d) { return +d.Date; }));
+            y.domain([d3.min(sources, function(c) { return d3.min(c.values, function(v) { return +v.val; }); }),
+                      d3.max(sources, function(c) { return d3.max(c.values, function(v) { return +v.val; }); }) ]);
+            console.log(y.domain());
+            x2.domain(x.domain());
+            y2.domain(y.domain());
+
+
+
+            var focuslineGroups = focus.select('.plot-area').selectAll("g")
+                .data(sources, function(d, i) { return d.name; });
+
+            focuslineGroups.enter()
+                .append("g")
+                .append("path")
+                .attr("class","line")
+                .merge(focuslineGroups.selectAll('path.line'))
+                .attr("d", function(d) { console.log(d);return line(d.values); })
+                .style("stroke", function(d) {return color(d.name);})
+                .attr("clip-path", "url(#clip)");
+            focuslineGroups.exit().remove();
+
+            var contextlineGroups = context.select('.plot-area').selectAll("g")
+                .data(sources);
+
+            contextlineGroups.exit().remove();
+
+            contextlineGroups.selectAll('path.line')
+                .attr("d", function(d) { return line2(d.values); })
+                .style("stroke", function(d) {return color(d.name);});
+
+            contextlineGroups.enter().append("g").append("path")
+                .attr("class", "line")
+                .attr("d", function(d) { return line2(d.values); })
+                .style("stroke", function(d) {return color(d.name);})
+                .attr("clip-path", "url(#clip)");
+
+
+           focus.select(".x.axis").transition().call(xAxis);
+            focus.select(".y.axis").call(yAxis);
+            context.select(".x.axis").transition().call(xAxis2);
+        }
+
+        function brush() {
+          var redrawLimiter = null;
+          if (!redrawLimiter) {
+            var selection = d3.event.selection;
+            x.domain(selection ? selection.map(x2.invert, x2) : x2.domain());
+            focus.selectAll("path.line").transition().attr("d",  function(d) {return line(d.values)});
+            focus.select(".x.axis").transition().call(xAxis);
+            focus.select(".y.axis").call(yAxis);
+
+            redrawLimiter = setTimeout(function(){
+              redrawLimiter = null;
+            },50);
+          }
+        }
+
+
+    }); // end document ready
+
+
+
     </script>
 </body>
 </html>
