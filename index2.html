@@ -110,9 +110,9 @@
     $(function(){
         var ccwidth = $(".chart-container").width();
         var ccheight = $(".chart-container").height();
-        var ccheight = ccheight > 500 ? ccheight : 500;
+        var ccheight = ccheight > 750 ? ccheight : 800;
         var margin = {top: 10, right: 10, bottom: 100, left: 80},
-        margin2 = {top: 430, right: 10, bottom: 20, left: 80},
+        margin2 = {top: ccheight - 70, right: 10, bottom: 20, left: 80},
         width = ccwidth - margin.left - margin.right,
         height = ccheight - margin.top - margin.bottom,
         height2 = ccheight - margin2.top - margin2.bottom;
@@ -219,6 +219,7 @@
                         });
                         var filteredData = [];
                         console.log("current selected cols: " + activeColumns.toString());
+
                         data.map(function(rowObj){
                             var retObj = {};
                             activeColumns.map(function(dataKey) {
@@ -348,26 +349,23 @@
             x2.domain(x.domain());
             y2.domain(y.domain());
 
+            function sourceIdentity (d, i) {
+                var ret;
+//                console.log(oldYDomain[0] != y.domain()[0] || oldYDomain[1] != y.domain()[1]);
+//                if (oldYDomain[0] != y.domain()[0] || oldYDomain[1] != y.domain()[1]) {
+//                    ret = d.name +"_"+ new Date().getTime(); // adding date component to the identity forces redraw every time...
+//                } else {
+//                    ret = d.name; // if scale didnt change no need to force a redraw
+//                }
+                ret = d.name +"_"+ new Date().getTime(); // adding date component to the identity forces redraw every time...
 
+                return d.values;
+            }
 
             var focuslineGroups = focus.select('.plot-area').selectAll("g")
                 .data(sources, sourceIdentity);
 
-            function sourceIdentity (d, i) {
-                var ret;
-                // console.log(oldYDomain);
-                // console.log(y.domain());
-                console.log(oldYDomain[0] != y.domain()[0] || oldYDomain[1] != y.domain()[1]);
-                if (oldYDomain[0] != y.domain()[0] || oldYDomain[1] != y.domain()[1]) {
-                    ret = d.name +"_"+ new Date().getTime(); // adding date component to the identity forces redraw every time...
-                } else {
-                    ret = d.name; // if scale didnt change no need to force a redraw
-                }
-                ret = d.name +"_"+ new Date().getTime(); // adding date component to the identity forces redraw every time...
 
-                // console.log(ret);
-                return ret;
-            }
 
             focuslineGroups
                 .enter()
