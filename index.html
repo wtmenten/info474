@@ -2,10 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <title>Assignment4</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
 
     <style>
-
+        body {
+            height:100vh;
+            background-color: rgb(85,85,85);
+            color:rgb(215,215,215);
+        }
         svg {
           font: 10px sans-serif;
         }
@@ -16,6 +23,12 @@
           fill: none;
           stroke: #000;
           shape-rendering: crispEdges;
+        }
+
+        .axis text {
+          stroke: rgb(200,200,200);
+          shape-rendering: crispEdges;
+
         }
 
         .y.axis path {
@@ -34,66 +47,226 @@
           fill: none;
         }
 
+        .legend-container {
+            overflow-y: scroll;
+            height:770px;
+            padding:1rem;
+            background-color: rgb(85,85,85);
+            color:rgb(215,215,215);
+        }
+
+        .form-check {
+            cursor:pointer;
+             margin-bottom: 0rem;
+            padding: .25rem 0rem;
+            border:1px solid;
+            border-color: rgb(100,100,100);
+            border-top:0px;
+        }
+        .form-check:first-child {
+            border-radius:2px 2px 0px 0px;
+            border-top:1px solid rgb(100,100,100);
+        }
+        .form-check:last-child {
+            border-radius:0px 0px 2px 2px;
+        }
+
+        .form-check-label {
+            padding-left: .75rem;
+        }
+
+        .color-marker {
+
+            width: .6rem;
+            position: absolute;
+            left:0px;
+            top:0px;
+            bottom:0px;
+            display: inline-block;
+        }
+
+        .filter-button {
+            margin-left: 1.1rem;
+        }
+
+        .pc-container {
+            /*background-color: white;*/
+        }
+        .pc-container svg {
+        font: 10px sans-serif;
+        }
+
+        .pc-container .background path {
+            fill: none;
+            stroke: rgba(75,75,75,.5);
+            /*stroke: #ddd;*/
+            shape-rendering: crispEdges;
+        }
+
+        .pc-container .foreground path {
+            fill: none;
+            stroke: #d0a90c;
+            /*stroke: steelblue;*/
+        }
+
+        .pc-container .brush .extent {
+            fill-opacity: .3;
+            stroke: #fff;
+            shape-rendering: crispEdges;
+        }
+
+        .pc-container .axis line,
+        .pc-container .axis path {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        /* .pc-container .axis text {
+        fill:black;
+        cursor: move;
+        font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }*/
+
+        .pc-container .axis text.header {
+            text-transform:capitalize;
+            font-size:1rem;
+        }
+
     </style>
 </head>
 <body>
-    <svg width="960" height="500"></svg>
+    <div class="container-fluid d3-container">
+        <div class="row">
+            <div class="nav-container col-md-12"></div>
+        </div>
+        <div class="row chart-row">
+            <div class="col-md-9">
+                <div class="chart-container col-md-12"></div>
+                <div class="pc-container col-md-12"></div>
+            </div>
+            <div id='legend' class="legend-container col-md-3"></div>
+        </div>
+
+    </div>
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="linegraph.js"></script>
+    <script src="pcoords.js"></script>
+
     <script>
+    $(function(){
 
-    var svg = d3.select("svg"),
-        margin = {top: 20, right: 20, bottom: 30, left: 50},
-        width = +svg.attr("width") - margin.left - margin.right,
-        height = +svg.attr("height") - margin.top - margin.bottom,
-        g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        d3.csv("dataframe.csv", function(error, source) {
+            drawLegend(source);
+//            initLineChart(source);
+        });
 
-    var parseTime = d3.timeParse("%d-%b-%y");
+    }); // end document ready
 
-    var x = d3.scaleTime()
-        .rangeRound([0, width]);
 
-    var y = d3.scaleLinear()
-        .rangeRound([height, 0]);
+        function drawLegend(data) {
+            var legendwidth = $(".legend-container").width();
+//            console.log(d3.keys(data[0]));
+//            console.log(data);
+            var legendState = {};
+            d3.keys(data[0]).map(function (d,i) {
+                var initConditions = d=="Date" || i == 1;
+                legendState[d] = initConditions ? true : null;
+            });
 
-    var line = d3.line()
-        .x(function(d) { return x(d.date); })
-        .y(function(d) { return y(d.close); });
+            color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Date"; }));
 
-    d3.tsv("data.tsv", function(d) {
-      d.date = parseTime(d.date);
-      d.close = +d.close;
-      return d;
-    }, function(error, data) {
-      if (error) throw error;
+            var inputGroup = d3.select(".legend-container").selectAll('.form-check').data(d3.keys(data[0]).filter(function(d){return d!= "Date"}))
+                .enter()
+                    .append('div')
+                    .attr('class', 'form-check clearfix')
+                    .attr('value', function (d) {return d;})
+                    .on('click', function(){ // makes the whole element toggleable
+                        var btn = d3.select(this).select('.filter-button');
+                        btn.attr('checked', function (d, i) {return btn.attr('checked') ? null :true});
+                        btn.dispatch('change');
+                    });
 
-      x.domain(d3.extent(data, function(d) { return d.date; }));
-      y.domain(d3.extent(data, function(d) { return d.close; }));
+            inputGroup.append('div').attr('class', 'color-marker').style('background-color',function(d){
+                return color(d);
+            });
 
-      g.append("g")
-          .attr("transform", "translate(0," + height + ")")
-          .call(d3.axisBottom(x))
-        .select(".domain")
-          .remove();
+            inputGroup.append('input')
+                    .attr('type', 'checkbox')
+                    .attr('class', 'filter-button clearfix')
+                    .attr('value', function (d) {return d;})
+                    .attr('checked', function (d, i) {return legendState[d];})
+                    .on("change", function() {
+                        console.log('saw filter change');
+                        console.log(legendState);
+                        legendState[this.value] = this.checked ? true : null;
 
-      g.append("g")
-          .call(d3.axisLeft(y))
-        .append("text")
-          .attr("fill", "#000")
-          .attr("transform", "rotate(-90)")
-          .attr("y", 6)
-          .attr("dy", "0.71em")
-          .attr("text-anchor", "end")
-          .text("Price ($)");
 
-      g.append("path")
-          .datum(data)
-          .attr("fill", "none")
-          .attr("stroke", "steelblue")
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-linecap", "round")
-          .attr("stroke-width", 1.5)
-          .attr("d", line);
-    });
+                        var activeColumns = d3.keys(data[0]).filter(function(key) {
+                            if (key == this.value) {
+                                return this.checked ? true : null;
+                            } else {
+                                return legendState[key];
+                            }
+                        });
+                        var filteredData = [];
+                        console.log("current selected cols: " + activeColumns.toString());
+
+                        data.map(function(rowObj){
+                            var retObj = {};
+                            activeColumns.map(function(dataKey) {
+                               retObj[dataKey] = rowObj[dataKey];
+                            });
+                            filteredData.push(retObj);
+                        });
+
+                        drawLineChart(filteredData);
+                        drawPcoords(filteredData);
+
+                    });
+
+            inputGroup.append('span').attr('class', 'form-check-label')
+                    .text(function (d) {return d;});
+
+            var activeColumns = d3.keys(data[0]).filter(function(key) {
+                return legendState[key];
+            });
+            var filteredData = [];
+            data.map(function(rowObj){
+                var retObj = {};
+                activeColumns.map(function(dataKey) {
+                   retObj[dataKey] = rowObj[dataKey];
+                });
+                filteredData.push(retObj);
+            });
+
+
+            initLineChart(filteredData);
+            initPcoords(filteredData);
+
+
+//            dofilter();
+//
+//            function doFilter(newVal, newState) {
+//
+//                var activeColumns = d3.keys(data[0]).filter(function(key) { return legendState[key] });
+//                var filteredData = [];
+//                console.log(activeColumns);
+//                data.map(function(rowObj){
+//                    var retObj = {};
+//                    activeColumns.map(function(dataKey) {
+//                       retObj[dataKey] = rowObj[dataKey];
+//                    });
+//                    filteredData.push(retObj);
+//                });
+//
+//                updateLineChart(filteredData);
+//
+//            }
+        }
 
     </script>
 </body>
