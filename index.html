@@ -202,8 +202,8 @@
                     .attr('value', function (d) {return d;})
                     .attr('checked', function (d, i) {return legendState[d];})
                     .on("change", function() {
-                        console.log('saw filter change');
-                        console.log(legendState);
+                        // console.log('saw filter change');
+                        // console.log(legendState);
                         legendState[this.value] = this.checked ? true : null;
 
 
@@ -215,7 +215,7 @@
                             }
                         });
                         var filteredData = [];
-                        console.log("current selected cols: " + activeColumns.toString());
+                        // console.log("current selected cols: " + activeColumns.toString());
 
                         data.map(function(rowObj){
                             var retObj = {};

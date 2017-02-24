@@ -17,6 +17,7 @@ var pcDragging = null,
     pcKeys = null,
     pcLine = d3.line();
 
+var pcSvg;
 
 function initPcoords(data) {
 

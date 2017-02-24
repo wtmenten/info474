@@ -105,8 +105,8 @@
         var oldYDomain = y.domain();
         // draws the line chart view
         function drawLineChart(data, callback) {
-            console.log('doing chart');
-            console.log(data);
+            // console.log('doing chart');
+            // console.log(data);
 
             data.forEach(function(d) {
             //          d.Date = parseDate(d.Date);
@@ -187,10 +187,18 @@
 
             if (!redrawLimiter) {
                 var selection;
-                if (d3.event && d3.event.selection != undefined) {
-                    selection = d3.event.selection;
-                    prevSelection = selection;
-                    x.domain(selection ? selection.map(x2.invert, x2) : x2.domain());
+                console.log(d3.event);
+                // console.log(d3.event.selection);
+
+                if (d3.event && d3.event.type != 'change') {
+                    if (d3.event.selection != null) {
+                         selection = d3.event.selection;
+                        prevSelection = selection;
+                        x.domain(selection ? selection.map(x2.invert, x2) : x2.domain());
+                    } else {
+                        console.log('clearing brush');
+                        x.domain(x2.domain());
+                    }
                 } else {
                     if (prevSelection) {
                         selection = prevSelection;
