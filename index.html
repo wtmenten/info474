@@ -47,9 +47,20 @@
           fill: none;
         }
 
+        .nav-container {
+            min-height: 2.5rem;
+            height:5vh;
+        }
+
+        .chart-container, .pc-container {
+            /*max-height:90vh;*/
+            /*overflow-y: scroll;*/
+        }
+
         .legend-container {
+            max-height:90vh;
             overflow-y: scroll;
-            height:770px;
+            /*height:770px;*/
             padding:1rem;
             background-color: rgb(85,85,85);
             color:rgb(215,215,215);
@@ -132,23 +143,46 @@
             text-transform:capitalize;
             font-size:1rem;
         }
-
+        .chart-row {
+            height: ;
+            height:100%;
+        }
+        /*#chartTabs div {
+            height:100%;
+        }
+*/
     </style>
 </head>
 <body>
-    <div class="container-fluid d3-container">
-        <div class="row">
-            <div class="nav-container col-md-12"></div>
-        </div>
-        <div class="row chart-row">
-            <div class="col-md-9">
-                <div class="chart-container col-md-12"></div>
-                <div class="pc-container col-md-12"></div>
-            </div>
-            <div id='legend' class="legend-container col-md-3"></div>
-        </div>
 
+    <div class="container-fluid d3-container ">
+        <div class="row chart-row">
+            <div class="nav-container col-md-12">
+                <ul class="nav nav-tabs" role="tablist">
+                  <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#multi-line" role="tab">Multi-line</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#pcoords" role="tab">P Coords</a>
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="#legend">Legend</a>
+                  </li>
+                </ul>
+            </div>
+            <div id="chartTabs" class="tab-content col-md-9">
+                <div class="chart-container tab-pane fade show active col-md-12" id="multi-line" role="tabpanel"></div>
+                <div class="pc-container tab-pane fade col-md-12" id="pcoords" role="tabpanel"></div>
+            </div>
+            <div class="col-md-3">
+                <h2>Legend</h2>
+                <div id='legend' class="legend-container"></div>
+            </div>
+
+        </div>
     </div>
+
+
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
@@ -159,7 +193,10 @@
     <script>
     var initialSource;
     $(function(){
-
+        $('#chartTabs a').click(function (e) {
+          e.preventDefault()
+          $(this).tab('show')
+        })
         d3.csv("dataframe.csv", function(error, source) {
             initialSource = source;
             drawLegend(source);
