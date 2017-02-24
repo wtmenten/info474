@@ -187,16 +187,12 @@
 
             if (!redrawLimiter) {
                 var selection;
-                console.log(d3.event);
-                // console.log(d3.event.selection);
-
                 if (d3.event && d3.event.type != 'change') {
                     if (d3.event.selection != null) {
                          selection = d3.event.selection;
                         prevSelection = selection;
                         x.domain(selection ? selection.map(x2.invert, x2) : x2.domain());
                     } else {
-                        console.log('clearing brush');
                         x.domain(x2.domain());
                     }
                 } else {
@@ -204,7 +200,6 @@
                         selection = prevSelection;
                         x.domain(selection ? selection.map(x2.invert, x2) : x2.domain());
                     } else {
-                        console.log('clearing brush');
                         x.domain(x2.domain());
                     }
                 }
