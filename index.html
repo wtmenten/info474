@@ -157,9 +157,11 @@
     <script src="pcoords.js"></script>
 
     <script>
+    var initialSource;
     $(function(){
 
         d3.csv("dataframe.csv", function(error, source) {
+            initialSource = source;
             drawLegend(source);
 //            initLineChart(source);
         });

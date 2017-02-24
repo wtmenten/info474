@@ -129,16 +129,8 @@
             y2.domain(y.domain());
 
             function sourceIdentity (d, i) {
-                var ret;
-//                console.log(oldYDomain[0] != y.domain()[0] || oldYDomain[1] != y.domain()[1]);
-//                if (oldYDomain[0] != y.domain()[0] || oldYDomain[1] != y.domain()[1]) {
-//                    ret = d.name +"_"+ new Date().getTime(); // adding date component to the identity forces redraw every time...
-//                } else {
-//                    ret = d.name; // if scale didnt change no need to force a redraw
-//                }
-                ret = d.name +"_"+ new Date().getTime(); // adding date component to the identity forces redraw every time...
-
-                return d.values;
+                var ret = d3.keys(initialSource[0]).indexOf(d.name); // initialSource is a global from index where the data gets loaded.
+                return ret;
             }
 
             var focuslineGroups = focus.select('.plot-area').selectAll("g")
