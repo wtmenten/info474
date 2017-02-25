@@ -1,0 +1,158 @@
+body {
+    height:100vh;
+    background-color: rgb(85,85,85);
+    color:rgb(215,215,215);
+}
+svg {
+  font: 10px sans-serif;
+}
+
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  stroke: rgb(200,200,200);
+  shape-rendering: crispEdges;
+
+}
+
+.y.axis path {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
+
+.line {
+  fill: none;
+}
+
+.nav-container {
+    min-height: 2.5rem;
+    height:5vh;
+}
+
+.chart-container, .pc-container {
+    overflow-x: scroll;
+    /*max-height:90vh;*/
+    /*overflow-y: scroll;*/
+}
+
+.legend-container {
+    max-height:90vh;
+    overflow-y: scroll;
+    /*height:770px;*/
+    padding:1rem;
+    background-color: rgb(85,85,85);
+    color:rgb(215,215,215);
+}
+
+.form-check {
+    cursor:pointer;
+     margin-bottom: 0rem;
+    padding: .25rem 0rem;
+    border:1px solid;
+    border-color: rgb(100,100,100);
+    border-top:0px;
+}
+.form-check:first-child {
+    border-radius:2px 2px 0px 0px;
+    border-top:1px solid rgb(100,100,100);
+}
+.form-check:last-child {
+    border-radius:0px 0px 2px 2px;
+}
+
+.form-check-label {
+    padding-left: .75rem;
+}
+
+.color-marker {
+
+    width: .6rem;
+    position: absolute;
+    left:0px;
+    top:0px;
+    bottom:0px;
+    display: inline-block;
+}
+
+.filter-button {
+    margin-left: 1.1rem;
+}
+
+.pc-container {
+    /*background-color: white;*/
+}
+.pc-container svg {
+font: 10px sans-serif;
+}
+
+.pc-container .background path {
+    fill: none;
+    stroke: rgba(75,75,75,.5);
+    /*stroke: #ddd;*/
+    shape-rendering: crispEdges;
+}
+
+.pc-container .foreground path {
+    fill: none;
+    stroke: #d0a90c;
+    /*stroke: steelblue;*/
+}
+
+.pc-container .brush .extent {
+    fill-opacity: .3;
+    stroke: #fff;
+    shape-rendering: crispEdges;
+}
+
+.pc-container .axis line,
+.pc-container .axis path {
+    fill: none;
+    stroke: #000;
+    shape-rendering: crispEdges;
+}
+
+/* .pc-container .axis text {
+fill:black;
+cursor: move;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}*/
+
+.pc-container .axis text.header {
+    text-transform:capitalize;
+    font-size:1rem;
+}
+.chart-row {
+    height: ;
+    height:100%;
+}
+
+.grid line {
+  stroke: lightgrey;
+  stroke-opacity: 0.1;
+  shape-rendering: crispEdges;
+}
+
+.grid path {
+  stroke-width: 0;
+}
+
+.context-line {
+  stroke: #d0a90c;
+  opacity: .5;
+}
+/*#chartTabs div {
+    height:100%;
+}

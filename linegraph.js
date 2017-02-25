@@ -18,7 +18,7 @@
 
         var xAxis = d3.axisBottom(x).tickFormat(d3.format('.0f')),
             xAxis2 = d3.axisBottom(x2).tickFormat(d3.format('.0f')),
-            yAxis = d3.axisLeft(y).tickFormat(d3.format('.2f')).ticks(10);
+            yAxis = d3.axisLeft(y).tickFormat(d3.format('.3f')).ticks(10);
 
         var xbrush = d3.brushX(x2)
             .on("start", brush)
@@ -31,14 +31,19 @@
             .y(function(d) { return y(+d.val); })
             .curve(d3.curveLinear);
 
+        var contextLine = d3.line()
+                        .y(function(d){ return y(0)})
+                        .x(function(d){ return x(+d.Date)})
+
         var line2 = d3.line()
             .defined(function(d) { return !isNaN(+d.val); })
             .x(function(d) {return x2(+d.Date); })
             .y(function(d) {return y2(+d.val); })
             .curve(d3.curveLinear);
 
+        var svg = null;
 
-        var svg = d3.select(".chart-container").append("svg")
+        svg = d3.select(".chart-container").append("svg")
                 .attr("width", width + margin.left + margin.right)
                 .attr("height", height + margin.top + margin.bottom);
 
@@ -133,22 +138,70 @@
                 return ret;
             }
 
-            var focuslineGroups = focus.select('.plot-area').selectAll("g")
+            var focuslineGroups = focus.select('.plot-area').selectAll("g.lines")
                 .data(sources, sourceIdentity);
 
 
+            var fgEnter = focuslineGroups
+                .enter();
 
-            focuslineGroups
-                .enter()
-                    .append("g")
+            fgEnter.append("g")
+                    .attr('class', 'lines')
                     .append("path")
                     .attr("class","line")
-                .merge(focuslineGroups.selectAll('path.line'))
+                .merge(focuslineGroups.selectAll('g.lines path.line'))
                     .attr("d", function(d) { return line(d.values); })
                     .style("stroke", function(d) {return color(d.name);})
                     .attr("clip-path", "url(#clip)");
 
             focuslineGroups.exit().remove();
+
+
+
+
+            focus.select('.context-line').remove();
+
+            console.log(y.domain());
+            console.log(y.domain()[0] <= 0 && y.domain()[1] >= 0);
+            if (y.domain()[0] <= 0 && y.domain()[1] >= 0) {
+                console.log('drawing focus line');
+                // y focusline at 0
+                fgEnter
+                    .append("g")
+                    .attr("class","context-line")
+                    .append("path")
+                    .style("stroke-dasharray", ("3, 3"))
+                    .merge(focus.selectAll('.context-line path'))
+                    .attr("d", function(d) { return contextLine(d.values); });
+                    focus.select('.context-line').exit().remove();
+
+            } else {
+                focus.select('.context-line').remove();
+            }
+
+            focus.selectAll('.grid').remove();
+            // x gridlines
+            focus.append("g")
+                .attr("class", "grid")
+                .attr("transform", "translate(0," + height + ")")
+                .call(
+                    d3.axisBottom(x).ticks(10)
+                    .tickSize(-height)
+                    .tickFormat("")
+                );
+
+            // y gridlines
+            focus.append("g")
+                .attr("class", "grid")
+                .call(
+                    d3.axisLeft(y).ticks(13)
+                    .tickSize(-width)
+                    .tickFormat("")
+                );
+
+
+
+
 
 
 
@@ -171,6 +224,7 @@
 
            focus.select(".x.axis").transition().call(xAxis);
             focus.select(".y.axis").call(yAxis);
+            context.select(".y.axis").call(yAxis);
             context.select(".x.axis").transition().call(xAxis2);
 
             oldYDomain = y.domain();
@@ -205,7 +259,7 @@
                 }
 
                 focus.selectAll("path.line").attr("d",  function(d) {return line(d.values)});
-                focus.select(".x.axis").transition().call(xAxis);
+                focus.select(".x.axis").call(xAxis);
                 focus.select(".y.axis").call(yAxis);
                 redrawLimiter = setTimeout(function(){
                     redrawLimiter = null;
