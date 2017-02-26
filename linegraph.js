@@ -158,14 +158,11 @@
 
 
 
-
+            // do context line
             focus.select('.context-line').remove();
 
-            console.log(y.domain());
-            console.log(y.domain()[0] <= 0 && y.domain()[1] >= 0);
             if (y.domain()[0] <= 0 && y.domain()[1] >= 0) {
-                console.log('drawing focus line');
-                // y focusline at 0
+                // y focusline at 0 for better crossover context.
                 fgEnter
                     .append("g")
                     .attr("class","context-line")
@@ -173,12 +170,13 @@
                     .style("stroke-dasharray", ("3, 3"))
                     .merge(focus.selectAll('.context-line path'))
                     .attr("d", function(d) { return contextLine(d.values); });
-                    focus.select('.context-line').exit().remove();
+                focus.selectAll('.context-line').exit().remove();
 
             } else {
-                focus.select('.context-line').remove();
+                focus.selectAll('.context-line').remove();
             }
 
+            // do gridlines
             focus.selectAll('.grid').remove();
             // x gridlines
             focus.append("g")
