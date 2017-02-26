@@ -18,8 +18,8 @@ var groupFeatures = {
     byDomain: function(data, options) {
         var groups = [];
         var sortFuncs =  [
-            function(val){ return val.range[0]},
             function(val){ return val.range[1] - val.range[0]},
+            function(val){ return val.range[0]},
         ];
 
         for (var i = 0, iLen = data.length; i < iLen; i++) {
@@ -43,32 +43,15 @@ var groupFeatures = {
                     var tgMax = group.range[1];
                     var tlMin = localMin;
                     var tlMax = localMax;
-                    // var tgMin = Math.log(group.range[0]);
-                    // var tgMax = Math.log(group.range[1]);
-                    // var tlMin = Math.log(localMin);
-                    // var tlMax = Math.log(localMax);
                     minRatio = Math.abs((tlMin+0.001)/(tgMin+0.001))
-                    minTest = minRatio > .4 && minRatio < 1.6;
+                    minTest = minRatio > .5 && minRatio < 1.5;
                     maxRatio = Math.abs((tlMax+0.001)/(tgMax+0.001))
-                    maxTest = maxRatio > .4 && maxRatio < 1.6;
-                    // if (group.range[1] < 0)  {
-                    //     maxTest = tgMax * 0.5;
-                    // } else {
-                    //     maxTest = tgMax * 2;
-                    // }
-                    // var groupRange = tgMax - tgMin;
-                    // var localRange = tlMax - tlMin;
+                    maxTest = maxRatio > .5 && maxRatio < 1.5;
 
-                    // var rangeTest;
-                    // if (groupRange > localRange) {
-                    //     rangeTest = localRange * 2 > groupRange;
-                    // } else {
-                    //     rangeTest = localRange > groupRange * 2;
-                    // }
-
-                    var isWithinAcceptableMin = minTest;
-                    var isWithinAcceptableMax = maxTest;
-                    if (isWithinAcceptableMin && isWithinAcceptableMax) {
+                    var rangeTest = Math.abs((tgMax-tgMin) - (tlMax-tlMin)) < 5; // TODO mabe the .2 could become normalized to also help group the volumes
+                    var isWithinAcceptableMin = minTest || Math.abs((tgMin - tlMin)) < 2;
+                    var isWithinAcceptableMax = maxTest || Math.abs((tgMax - tlMax)) < 2;
+                    if ((isWithinAcceptableMin && isWithinAcceptableMax) || (rangeTest && isWithinAcceptableMin) || (rangeTest && isWithinAcceptableMax)) {
                         group.features.push(col);
                         unfound = false;
                         if (localMin < group.range[0]) {
