@@ -1,11 +1,13 @@
 var ccwidth = $(".chart-container").width();
 var ccheight = $(".chart-container").height();
 var ccheight = ccheight > 800 ? ccheight : 800;
+var xLabelPadding = 10;
+
 var margin = {top: 10, right: 10, bottom: 100, left: 80},
 margin2 = {top: ccheight - 70, right: 10, bottom: 20, left: 80},
 width = ccwidth - margin.left - margin.right,
 height = ccheight - margin.top - margin.bottom,
-height2 = ccheight - margin2.top - margin2.bottom;
+height2 = ccheight - margin2.top - margin2.bottom - xLabelPadding;
 
 // var color = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -21,6 +23,7 @@ var yFocusAxes = {};
 var xAxis = d3.axisBottom(x).tickFormat(d3.format('.0f')),
     xAxis2 = d3.axisBottom(x2).tickFormat(d3.format('.0f')),
     yAxis = d3.axisLeft(y).tickFormat(d3.format('.3f')).ticks(10);
+
 
 var xbrush = d3.brushX(x2)
     .on("start", brush)
@@ -76,7 +79,10 @@ function initLineChart(groups) {
     context.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + height2 + ")")
-        .call(xAxis2);
+        .call(xAxis2).append("text")
+            .attr("text-anchor", "middle")  // this makes it easy to centre the text as the transform is applied to the anchor
+            .attr("transform", "translate("+ (width/2) +","+(height2 - 10)+")")  // centre below axis
+            .text("Date");
 
     context.append('g').attr('class','plot-area');
 
@@ -163,6 +169,7 @@ function drawLineChart(groups) {
             .each(function(group){
                 d3.select(this).call(yFocusAxes[group.name])
             });
+
 
     focusChartGroupsChartArea.append('g').attr('class', 'plot-area')
 
@@ -261,6 +268,7 @@ function drawLineChart(groups) {
             .attr("clip-path", "url(#clip)");
 
     contextlineGroups.exit().remove();
+
 
 
 
