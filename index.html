@@ -50,6 +50,8 @@
 
     <script>
     var initialSource;
+    color = d3.scaleOrdinal(d3.schemeCategory10);
+
     $(function(){
         $('#chartTabs a').click(function (e) {
           e.preventDefault()
@@ -70,11 +72,24 @@
 //            console.log(data);
             var legendState = {};
             d3.keys(data[0]).map(function (d,i) {
-                var initConditions = d=="Date" || i == 1;
+                var initialCols = ['pr 5day MA', 'ex 5day ma', 'Predicted CumSum', 'Expected CumSum', 'T69_25-day_Adj._Close_MA', 'T69_50-day_Adj._Close_MA', 'T69_Adj._Volume', 'T69_Adj._Volume'];
+                var initConditions = d=="Date" || initialCols.includes(d);
                 legendState[d] = initConditions ? true : null;
             });
+            var activeColumns = d3.keys(data[0]).filter(function(key) {
+                    return legendState[key];
+            });
 
-            var featureSet = d3.keys(data[0]).filter(function(key) { return key !== "Date"; }).map(function(name) {
+            var activeFeatureSet = activeColumns.filter(function(col) { return col !== "Date"; }).map(function(name) {
+              return {
+                name: name,
+                values: data.map(function(d) {
+                  return {date: +d.Date, val: +d[name]};
+                })
+              };
+            });
+
+            var featureSet = d3.keys(data[0]).filter(function(col) { return col !== "Date"; }).map(function(name) {
               return {
                 name: name,
                 values: data.map(function(d) {
@@ -84,56 +99,57 @@
             });
 
             var groupedFeatures = groupFeatures.byDomain(featureSet);
+            var activeGroupedFeatures = groupFeatures.byDomain(activeFeatureSet).reverse();
             console.log(groupedFeatures);
 
             color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Date"; }));
 
-            var inputGroup = d3.select(".legend-container").selectAll('.form-check').data(d3.keys(data[0]).filter(function(d){return d!= "Date"}))
+            var inputGroup = d3.select(".legend-container").selectAll('g.feature-group').data(groupedFeatures)
                 .enter()
                     .append('div')
-                    .attr('class', 'form-check clearfix')
-                    .attr('value', function (d) {return d;})
+                    .attr('class', 'feature-group')
+
+            inputGroup.append('div')
+                    .attr('class', 'group-title')
+                    .text(function(d){ return d.name})
+
+            inputGroup.append('div')
+                    .attr('class', 'group-container')
+
+            inputGroup = inputGroup.select('.group-container')
+
+            inputGroup = inputGroup.selectAll('div.form-check')
+                .data(function(d){return d.features})
+                .enter()
+                    .append('div')
+                    .attr('class', 'form-check')
+                    .attr('value', function (d) {return d.name;})
                     .on('click', function(){ // makes the whole element toggleable
                         var btn = d3.select(this).select('.filter-button');
                         btn.attr('checked', function (d, i) {return btn.attr('checked') ? null :true});
                         btn.dispatch('change');
-                    });
+                    })
 
-            inputGroup.append('div').attr('class', 'color-marker').style('background-color',function(d){
-                return color(d);
-            });
-
-            inputGroup.append('input')
+                    inputGroup.append('div').attr('class', 'color-marker').style('background-color',function(d){
+                        return color(d.name);
+                    })
+                    inputGroup.append('input')
                     .attr('type', 'checkbox')
                     .attr('class', 'filter-button clearfix')
-                    .attr('value', function (d) {return d;})
-                    .attr('checked', function (d, i) {return legendState[d];})
+                    .attr('value', function (d) {return d.name;})
+                    .attr('checked', function (d, i) {return legendState[d.name];})
                     .on("change", function() {
-                        // console.log('saw filter change');
-                        // console.log(legendState);
                         legendState[this.value] = this.checked ? true : null;
 
-
-                        var activeColumns = d3.keys(data[0]).filter(function(key) {
+                        activeColumns = d3.keys(data[0]).filter(function(key) {
                             if (key == this.value) {
                                 return this.checked ? true : null;
                             } else {
                                 return legendState[key];
                             }
                         });
-                        var filteredData = [];
-                        // console.log("current selected cols: " + activeColumns.toString());
 
-                        data.map(function(rowObj){
-                            var retObj = {};
-                            activeColumns.map(function(dataKey) {
-                               retObj[dataKey] = rowObj[dataKey];
-                            });
-                            filteredData.push(retObj);
-                        });
-
-
-                        var featureSet2 = activeColumns.filter(function(col) { return col !== "Date"; }).map(function(name) {
+                        activeFeatureSet = activeColumns.filter(function(col) { return col !== "Date"; }).map(function(name) {
                           return {
                             name: name,
                             values: data.map(function(d) {
@@ -141,22 +157,21 @@
                             })
                           };
                         });
-                        console.log(featureSet2);
-                        var groupedFeatures = groupFeatures.byDomain(featureSet2);
-                        console.log(groupedFeatures);
 
+                        var activeGroupedFeatures = groupFeatures.byDomain(activeFeatureSet).reverse();
+                        console.log(activeGroupedFeatures);
 
-                        drawLineChart(filteredData);
-                        drawPcoords(filteredData);
+                        initLineChart(activeGroupedFeatures);
+                        drawPcoords(activeGroupedFeatures);
 
-                    });
-
-            inputGroup.append('span').attr('class', 'form-check-label')
-                    .text(function (d) {return d;});
+                    })
+                    inputGroup.append('span').attr('class', 'form-check-label')
+                    .text(function (d) {return d.name;});
 
             var activeColumns = d3.keys(data[0]).filter(function(key) {
                 return legendState[key];
             });
+
             var filteredData = [];
             data.map(function(rowObj){
                 var retObj = {};
@@ -167,8 +182,8 @@
             });
 
 
-            initLineChart(filteredData);
-            initPcoords(filteredData);
+            initLineChart(activeGroupedFeatures);
+            initPcoords(activeGroupedFeatures);
 
 
 //            dofilter();

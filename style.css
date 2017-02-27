@@ -57,6 +57,11 @@ svg {
     color:rgb(215,215,215);
 }
 
+.group-title {
+  font-size: 1.2rem;
+  margin-top: 0.8rem;
+}
+
 .form-check {
     cursor:pointer;
      margin-bottom: 0rem;
