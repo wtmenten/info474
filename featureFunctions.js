@@ -29,7 +29,7 @@ var groupFeatures = {
             if (groups.length == 0) {
                 var newRange = [localMin,localMax]
                 var newGroup = {
-                    name: newRange.toString(),
+                    name: newRange.map(function(r){return r < 1 ? r.toFixed(4) : r}).toString(),
                     range: newRange,
                     features: [col]
                 }
@@ -56,11 +56,11 @@ var groupFeatures = {
                         unfound = false;
                         if (localMin < group.range[0]) {
                             group.range[0] = localMin;
-                            group.name = group.range.toString();
+                            group.name = group.range.map(function(r){return r < 1 ? r.toFixed(4) : r}).toString();
                         }
                         if (localMax > group.range[1]) {
                             group.range[1] = localMax;
-                            group.name = group.range.toString();
+                            group.name = group.range.map(function(r){return r < 1 ? r.toFixed(4) : r}).toString();
                         }
                         break;
                     }
@@ -68,7 +68,7 @@ var groupFeatures = {
                 if (unfound) {
                         var newRange = [localMin,localMax]
                         var newGroup = {
-                            name: newRange.toString(),
+                            name: newRange.map(function(r){return r < 1 ? r.toFixed(4) : r}).toString(),
                             range: newRange,
                             features: [col]
                         }

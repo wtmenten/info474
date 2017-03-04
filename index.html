@@ -21,16 +21,16 @@
                   <li class="nav-item">
                     <a class="nav-link" data-toggle="tab" href="#pcoords" role="tab">P Coords</a>
                   </li>
-                  <li class="nav-item hidden-sm-up">
+                  <li class="nav-item hidden-md-up">
                     <a class="nav-link" href="#legend">Legend</a>
-                  </li>
+                    </li>
                 </ul>
             </div>
             <div id="chartTabs" class="tab-content col-md-9">
                 <div class="chart-container tab-pane fade show active col-md-12" id="multi-line" role="tabpanel"></div>
                 <div class="pc-container tab-pane fade col-md-12" id="pcoords" role="tabpanel"></div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3 legend-wrapper">
                 <h2>Legend</h2>
                 <div id='legend' class="legend-container"></div>
             </div>
@@ -166,7 +166,7 @@
 
                     })
                     inputGroup.append('span').attr('class', 'form-check-label')
-                    .text(function (d) {return d.name;});
+                    .text(function (d) {return d.name.split("_").join(" ");});
 
             var activeColumns = d3.keys(data[0]).filter(function(key) {
                 return legendState[key];

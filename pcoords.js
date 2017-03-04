@@ -1,7 +1,9 @@
 var ccwidth = $(".chart-container").width();
 var ccheight = $(".chart-container").height();
-var ccheight = ccheight > 750 ? ccheight : 800;
-var pcMargin = {top: 50, right: 10, bottom: 100, left: 80},
+// var ccheight = ccheight > 750 ? ccheight : 800;
+var ccheight = window.innerHeight - parseFloat($("body").css("font-size")) *3;
+
+var pcMargin = {top: 75, right: 0, bottom: 75, left: 0},
 pcMargin2 = {top: ccheight - 70, right: 10, bottom: 20, left: 80},
 pcWidth = ccwidth - pcMargin.left - pcMargin.right,
 pcHeight = ccheight - pcMargin.top - pcMargin.bottom,
@@ -150,7 +152,9 @@ function drawPcoords(groups) {
             d3.select(this).call(d3.axisLeft(pcY[d.name]));
         })
         .append("text")
-        .style("text-anchor", "middle")
+        .style("text-anchor", "start")
+        .style("transform", "rotate(-12deg)")
+
         .attr("y", -9)
         .attr("class", "header")
         .text(function (d, i) {

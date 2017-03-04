@@ -1,6 +1,14 @@
 var ccwidth = $(".chart-container").width();
 var ccheight = $(".chart-container").height();
-var ccheight = ccheight > 800 ? ccheight : 800;
+var ccheight = window.innerHeight - parseFloat($("body").css("font-size")) *3;
+
+console.log(ccheight);
+setTimeout(function(){
+    var ccheight = $(".chart-container").height();
+    var ccheight = window.innerHeight;
+    console.log(ccheight);
+},1000);
+// var ccheight = ccheight > 800 ? ccheight : 800;
 var xLabelPadding = 10;
 
 var margin = {top: 10, right: 10, bottom: 100, left: 80},
@@ -107,9 +115,10 @@ function resizeAxes(groups) {
     activeGroups = groups;
     x.domain(d3.extent(groups[0].features[0].values, function(d) { return +d.date; }));
     groups.map(function(group,i){
+        var groupPadding = 10
         var groupHeight = height / groups.length;
         var groupDomain = group.range;
-        yFocusScales[group.name] = d3.scaleLinear().range([groupHeight * (i+1) - (5), groupHeight * (i) + (5)]).domain(groupDomain);
+        yFocusScales[group.name] = d3.scaleLinear().range([groupHeight * (i+1) - (groupPadding), groupHeight * (i) + (groupPadding)]).domain(groupDomain);
         yFocusAxes[group.name] = d3.axisLeft(yFocusScales[group.name]).tickFormat(d3.format('.3f')).ticks(3);
     });
 
@@ -199,8 +208,8 @@ function drawLineChart(groups) {
                 .y(function(d){ return yFocusScales[group.name](0)})
                 .x(function(d){ return x(+d.date)})
 
-        // do context line
-        focuslineGroups.selectAll('.context-line').remove();
+        // // do context line
+        // focuslineGroups.selectAll('.context-line').remove();
 
         var zeroLine = focusChartGroupsChartArea.select('g.plot-area').selectAll('g.context-line')
         var zeroLine = focuslineGroups
@@ -230,20 +239,35 @@ function drawLineChart(groups) {
     .selectAll('g.grid').remove()
 
     focusChartGroupsChartArea.select('.plot-area').append("g") // x gridlines
-        .attr("class", "grid")
+        .attr("class", "grid x")
         .attr("transform", function(group,i){
-            return "translate(0," + (height / groups.length + 5) *(i+1) + ")"
+            var startPos = (height / groups.length + 5) *(i+1)
+            console.log(startPos)
+            return "translate(0," + startPos + ")"
         })
-        .each(function(group) {
+        .each(function(group, i) {
             d3.select(this).call(
                 d3.axisBottom(x).ticks(10)
-                    .tickSize(-height / groups.length)
+                    .tickSize(-height / groups.length + 5)
                     .tickFormat(""));
+            if (i > 0) {
+                var heightOffset = 10 + (i-1)*4
+                if ( i == groups.length -1) {
+                    heightOffset = 10 + (i-1)*4
+                }
+                // d3.select(this).insert("g",":first-child").attr("class", "divider").attr
+                d3.select(this).insert("rect",":first-child")
+                .style("fill","rgb(140,140,140)")
+                    .attr("x", -10)
+                    .attr("y", -(height / groups.length) - heightOffset)
+                    .attr("width", ccwidth+5)
+                    .attr("height", 1);
+            }
         });
 
     // y gridlines
     focusChartGroupsChartArea.select('.plot-area').append("g")
-        .attr("class", "grid")
+        .attr("class", "grid y")
         .each(function(group) {
             d3.select(this).call(
                 d3.axisLeft(yFocusScales[group.name]).ticks(4)
