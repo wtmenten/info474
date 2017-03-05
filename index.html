@@ -31,7 +31,7 @@
                 <div class="pc-container tab-pane fade col-md-12" id="pcoords" role="tabpanel"></div>
             </div>
             <div class="col-md-3 legend-wrapper">
-                <h2>Legend</h2>
+                <h2>Legend<small><small><i> - grouped by domain</i></small></small></h2>
                 <div id='legend' class="legend-container"></div>
             </div>
 
@@ -80,7 +80,8 @@
                     return legendState[key];
             });
 
-            var activeFeatureSet = activeColumns.filter(function(col) { return col !== "Date"; }).map(function(name) {
+            // var activeFeatureSet = activeColumns.filter(function(col) { return col !== "Date"; }).map(function(name) {
+            var activeFeatureSet = activeColumns.map(function(name) {
               return {
                 name: name,
                 values: data.map(function(d) {
@@ -122,10 +123,25 @@
                 .data(function(d){return d.features})
                 .enter()
                     .append('div')
-                    .attr('class', 'form-check')
+                    .attr('class',  function (d, i) {
+                        var classes = ['form-check']
+                        if (legendState[d.name]) {
+                            classes.push('active')
+                        }
+                        return classes.join(" ");
+                    })
                     .attr('value', function (d) {return d.name;})
                     .on('click', function(){ // makes the whole element toggleable
                         var btn = d3.select(this).select('.filter-button');
+
+                        d3.select(this).attr("class", function (d, i) {
+                            var classes = ['form-check'];
+                            if (!btn.attr('checked')) {
+                                classes.push('active')
+                            }
+                            return classes.join(" ");
+                        })
+
                         btn.attr('checked', function (d, i) {return btn.attr('checked') ? null :true});
                         btn.dispatch('change');
                     })
@@ -149,7 +165,7 @@
                             }
                         });
 
-                        activeFeatureSet = activeColumns.filter(function(col) { return col !== "Date"; }).map(function(name) {
+                        activeFeatureSet = activeColumns.map(function(name) {
                           return {
                             name: name,
                             values: data.map(function(d) {

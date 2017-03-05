@@ -149,20 +149,30 @@ function line(d) {
 };
 
 // draws the line chart view
-function drawLineChart(groups) {
+function drawLineChart(groupedCols) {
     // console.log('doing chart');
-    resizeAxes(groups);
 
+    var groups = groupedCols.map(function (g) {
+        var newG = Object.assign({},g)
+        newG.features = newG.features.filter(function(f){return f.name !== "Date"})
+        return newG.features.length > 0 ? newG : null
+    }).filter(function(g){return g != null})
+
+    resizeAxes(groups);
 
 
     function sourceIdentity (d, i) {
         var ret = d3.keys(initialSource[0]).indexOf(d.name); // initialSource is a global from index where the data gets loaded.
         return ret;
     }
+
     // fix for zero line
     focus.selectAll('.context-line').remove();
 
-    var focusChartGroups = focus.select('.trellis-area').selectAll("g.chart").data(groups, function(g) {return g.name+"_"+g.features.length;})
+    var focusChartGroups = focus.select('.trellis-area').selectAll("g.chart").data(groups, function(g) {
+        return g.name+"_"+g.features.length;
+        // return false;
+    })
 
     focusChartGroups.exit().remove();
     var focusChartGroupsChartArea = focusChartGroups

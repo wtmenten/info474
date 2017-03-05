@@ -89,6 +89,10 @@ svg {
     /*border-radius:0px 0px 2px 2px;*/
 }
 
+.form-check.active {
+  background-color: rgba(100,100,100,.2);
+}
+
 .form-check-label {
   position: relative;
   left:0.75rem;
@@ -96,7 +100,7 @@ svg {
 }
 
 .color-marker {
-
+    opacity: .25;
     width: .6rem;
     position: absolute;
     left:0px;
@@ -105,8 +109,13 @@ svg {
     display: inline-block;
 }
 
+.form-check.active .color-marker {
+  opacity: 1;
+}
+
 .filter-button {
     margin-left: 1.1rem;
+    display: none;
 }
 
 .pc-container {
@@ -217,6 +226,7 @@ font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 .legend-wrapper h2 {
   position: absolute;
   padding-left:1rem;
+  padding-top:.25rem;
   top: 0px;
   left: 0px;
  }
