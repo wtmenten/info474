@@ -21,7 +21,8 @@ height2 = ccheight - margin2.top - margin2.bottom - xLabelPadding;
 
 var parseDate = d3.timeParse("%Y%m");
 
-var x = d3.scaleTime().range([0, width]),
+// var x = d3.scaleTime().range([0, width]),
+var x = d3.scaleLinear().range([0, width]),
     x2 = d3.scaleTime().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
     y2 = d3.scaleLinear().range([height2, 0]);
@@ -51,7 +52,8 @@ var line2 = d3.line()
 
 var svg = null,
     focus = null,
-    context = null;
+    context = null,
+    tooltip = null;
 
 
 
@@ -61,6 +63,7 @@ var activeGroups;
 function initLineChart(groups) {
 
     d3.select(".chart-container svg").remove();
+
     svg = d3.select(".chart-container").append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom);
@@ -82,6 +85,8 @@ function initLineChart(groups) {
         .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
     focus.append('g').attr('class','trellis-area');
+
+    tooltip = d3.select(".chart-container").append("div").attr("class", "tt").append("h5").attr("class", "header");
 
 
     context.append("g")
@@ -176,7 +181,6 @@ function drawLineChart(groupedCols) {
 
     focusChartGroups.exit().remove();
     var focusChartGroupsChartArea = focusChartGroups
-
         .enter()
             .append('g')
             .attr('class', 'chart')
@@ -190,7 +194,51 @@ function drawLineChart(groupedCols) {
             });
 
 
-    focusChartGroupsChartArea.append('g').attr('class', 'plot-area')
+    focusChartGroupsChartArea.append('g').attr('class', 'plot-area').on("mousemove", function(group) {
+        // console.log(group);
+        var xPos = d3.mouse(this)[0] + margin.left + 25;
+        var yPos = d3.mouse(this)[1] + margin.top + 10;
+        var tooptipObj = {
+            header: "",
+            values:{}
+        };
+        $(".tt .tooltip-item-container").remove();
+            $(".tt").append("<div class='tooltip-item-container'></div>");
+
+
+        var closestIndex = Math.floor(x.invert(d3.mouse(this)[0] - 5));
+        // console.log(d3.mouse(this)[0]);
+        // console.log(closestIndex);
+        if (group.features[0].values[closestIndex] != undefined) {
+             for(var i = 0; i < group.features.length; i++) {
+                var currentFeature = group.features[i];
+                tooptipObj.header = currentFeature.values[closestIndex].date;
+                tooptipObj.values[currentFeature.name] = currentFeature.values[closestIndex];
+            }
+
+            $(".tt .header").text(tooptipObj.header);
+            Object.keys(tooptipObj.values).map(function(key,i){
+                var valueColor = color(key);
+                var ttName = key.split("_").join(" ") + ":";
+                var ttVal = tooptipObj.values[key].val.toFixed(4);
+                $(".tt .tooltip-item-container").append("<div class='tooltip-item clearfix'><span class='tooltip-item-color' style='background-color:"+valueColor+"'></span><span class='tooltip-item-name'>"+ttName+"</span><span class='tooltip-item-value'>"+ttVal+"</span></div>")
+            });
+
+            $(".tt").css({
+                "left": xPos + "px",
+                "top": yPos + "px"
+            })
+            $(".tt").css({display: 'block'})
+        } else {
+            $(".tt").css({display: 'none'})
+        }
+
+    }).on("mouseover", function(group){
+        $(".tt").css({display: 'block'})
+    }).on("mouseout", function(group){
+        $(".tt").css({display: 'none'})
+    })
+
 
     var focuslineGroups = focusChartGroupsChartArea.select('g.plot-area').selectAll("g.lines")
         .data(function(group){return group.features});
@@ -221,20 +269,21 @@ function drawLineChart(groupedCols) {
         // // do context line
         // focuslineGroups.selectAll('.context-line').remove();
 
-        var zeroLine = focusChartGroupsChartArea.select('g.plot-area').selectAll('g.context-line')
-        var zeroLine = focuslineGroups
-        zeroLine.enter()
+        // var zeroLine = focusChartGroupsChartArea.select('g.plot-area').selectAll('g.context-line')
+        var zeroLine = focuslineGroups;
+
+
+
+        if (group.range[0] < 0 && group.range[1] >= 0) {
+            // console.log('was in range here ^^');
+            zeroLine.enter()
                         .append("g")
                         .attr("class","context-line")
                         .append("path")
                         .style("stroke-dasharray", ("3, 3"))
                         .merge(focuslineGroups.selectAll('.context-line path'))
                         .attr("d", function(d) { return contextLine(d.values); });
-
-        zeroLine.exit().remove();
-
-        if (group.range[0] < 0 && group.range[1] >= 0) {
-            // console.log('was in range here ^^');
+            zeroLine.exit().remove();
         } else {
             // console.log(d3.select(this).selectAll('.context-line'));
             d3.select(this).selectAll('.context-line').remove();

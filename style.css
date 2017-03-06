@@ -2,6 +2,7 @@ body {
     height:100vh;
     background-color: rgb(40,40,40);
     color:rgb(215,215,215);
+    overflow:hidden;
 }
 svg {
   font: 10px sans-serif;
@@ -252,4 +253,34 @@ font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   .legend-wrapper {
     box-shadow: none;
   }
+}
+
+.tt {
+  background-color: rgba(50,50,50,.6);
+  padding: 8px;
+  /*outline: 1px solid #ccc;*/
+  display: none;
+  position: absolute;
+  min-width:240px;
+  z-index: 5000;
+}
+
+.tt .tooltip-item-color {
+  float:left;
+  width:0.5rem;
+  height:1rem;
+}
+.tt .tooltip-item {
+  font-size:.75rem;
+}
+
+.tt .tooltip-item-name {
+  padding:0rem .25rem;
+  float: left;
+}
+
+.tt .tooltip-item-value {
+  /*font-size:.75rem;*/
+  padding:0rem .25rem;
+  float:left;
 }
