@@ -48,7 +48,7 @@ var groupFeatures = {
                     maxRatio = Math.abs((tlMax+0.001)/(tgMax+0.001))
                     maxTest = maxRatio > .5 && maxRatio < 1.5;
 
-                    var rangeTest = Math.abs((tgMax-tgMin) - (tlMax-tlMin)) < 5; // TODO mabe the .2 could become normalized to also help group the volumes
+                    var rangeTest = Math.abs((tgMax-tgMin) - (tlMax-tlMin)) < 5;
                     var isWithinAcceptableMin = minTest || Math.abs((tgMin - tlMin)) < 2;
                     var isWithinAcceptableMax = maxTest || Math.abs((tgMax - tlMax)) < 2;
                     if ((isWithinAcceptableMin && isWithinAcceptableMax) || (rangeTest && isWithinAcceptableMin) || (rangeTest && isWithinAcceptableMax)) {

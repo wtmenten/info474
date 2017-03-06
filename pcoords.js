@@ -21,17 +21,20 @@ var pcDragging = null,
 
 var pcSvg;
 
+// this function removes and re initialized the chart.
 function initPcoords(data) {
-
     drawPcoords(data);
 }
 
+
+// this function draws the chart.
 function drawPcoords(groups) {
 
     activeGroups = groups;
     pcY = {};
     pcDragging = {};
 
+    // transform the groups into a set of features with their assoicated group information inside each feature
     var features = groups.reduce(function(acc, group,i){
 
         var groupHeight = height / groups.length;
@@ -51,11 +54,6 @@ function drawPcoords(groups) {
             },acc);
     }, []);
 
-
-
-    console.log(features);
-    console.log(groups);
-
     pcX = d3.scaleBand().rangeRound([0, pcWidth]).padding(1);
     pcX.domain(pcDimensions = features.map(function (d,i) {
             return d.name;
@@ -64,17 +62,15 @@ function drawPcoords(groups) {
 
 
 
-
+    // zip all features together by date so that a line is a single row in the dataset
     var dataZipped = features[0].values.map(function(f,i){
-        // var data = [v.date]
         return _.zipObject(features.map(function(f){return f.name}), features.map(function(f){return f.values[i]}));
-    console.log(dataZipped);
     })
 
-    console.log(dataZipped);
-
+    // removes the old chart
     d3.select('.pc-container').select('svg').remove();
 
+    // adds new one
     var pcSvg = d3.select('.pc-container')
         .append("svg")
         .attr("width", pcWidth + pcMargin.left + pcMargin.right)
@@ -82,7 +78,7 @@ function drawPcoords(groups) {
         .append("g")
         .attr("transform", "translate(" + pcMargin.left + "," + pcMargin.top + ")");
 
-
+    // init the brushes to empty
     pcExtents = pcDimensions.map(function (p) {
         return [0, 0];
     });
@@ -95,7 +91,7 @@ function drawPcoords(groups) {
         .enter().append("path")
         .attr("d", path);
 
-    // Add blue foreground lines for focus.
+    // Add gold foreground lines for focus.
     pcForeground = pcSvg.append("g")
         .attr("class", "foreground")
         .selectAll("path")
@@ -112,6 +108,7 @@ function drawPcoords(groups) {
             return "translate(" + pcX(d.name) + ")";
         });
 
+    // reordering features interaction
     pcAxisGroups.call(d3.drag()
         .subject(function (d) {
             return {x: pcX(d.name)};
@@ -179,7 +176,6 @@ function drawPcoords(groups) {
 
 
     function position(d) {
-        // console.log(pcDragging);
         var v = pcDragging[d];
         return v == null ? pcX(d) : v;
     }
@@ -192,10 +188,6 @@ function drawPcoords(groups) {
     function path(d) {
         var linePath = pcDimensions.map(function(k,i) {
             var dat = d[k];
-            // console.log(k);
-            // console.log(position(k));
-            // console.log(pcY[k](dat.val));
-            // console.log(dat);
             var axisCoords = [position(k), pcY[k](dat.val)];
             return axisCoords;
         })
@@ -232,24 +224,3 @@ function drawPcoords(groups) {
 
 
 }
-
-// init() {
-
-//         var dataset = this.dataset;
-//         this.keys = dataset.shift();
-//         this.rotatedDataset = this.keys.map(function (col, i) {
-//             return dataset.map(function (row) {
-//                 return row[i];
-//             });
-//         });
-//         this.cleanedDataset = dataset;
-
-//         this.draw();
-
-
-//         if (this.options.resize) {
-//             setTimeout(function() {
-//                 window.dispatchEvent(new Event('resize'));
-//             }, 10);
-//         }
-//     }

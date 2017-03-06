@@ -1,12 +1,9 @@
 var ccwidth = $(".chart-container").width();
 var ccheight = $(".chart-container").height();
 var ccheight = window.innerHeight - parseFloat($("body").css("font-size")) *3;
-
-console.log(ccheight);
 setTimeout(function(){
     var ccheight = $(".chart-container").height();
     var ccheight = window.innerHeight;
-    console.log(ccheight);
 },1000);
 // var ccheight = ccheight > 800 ? ccheight : 800;
 var xLabelPadding = 10;
@@ -17,10 +14,12 @@ width = ccwidth - margin.left - margin.right,
 height = ccheight - margin.top - margin.bottom,
 height2 = ccheight - margin2.top - margin2.bottom - xLabelPadding;
 
+// this is done in index now so both views can use
 // var color = d3.scaleOrdinal(d3.schemeCategory10);
 
 var parseDate = d3.timeParse("%Y%m");
 
+// changed from time to linear because my 'dates' are just integers
 // var x = d3.scaleTime().range([0, width]),
 var x = d3.scaleLinear().range([0, width]),
     x2 = d3.scaleTime().range([0, width]),
@@ -40,10 +39,6 @@ var xbrush = d3.brushX(x2)
     .on("end", brush); // for checking emptyness
 var xbrushContext;
 
-
-
-
-
 var line2 = d3.line()
     .defined(function(d) { return !isNaN(+d.val); })
     .x(function(d) {return x2(+d.date); })
@@ -57,10 +52,9 @@ var svg = null,
     vertical;
 
 
-
-
 var activeGroups;
 
+// this function removes and re initialized the chart.
 function initLineChart(groups) {
 
     d3.select(".chart-container svg").remove();
@@ -89,14 +83,16 @@ function initLineChart(groups) {
 
     tooltip = d3.select(".chart-container").append("div").attr("class", "tt").append("h5").attr("class", "header");
 
+    d3.select(".chart-container .vertical-context").remove();
     vertical = d3.select(".chart-container")
             .append("div")
+            .attr('class', 'vertical-context')
             // .attr("class", "remove")
             .style("position", "absolute")
             .style("z-index", "1")
             .style("width", "1px")
-            // .style("height", "380px")
-            .style("top", "10px")
+            .style("display", "none")
+            .style("top", "15px")
             .style("bottom", "110px")
             .style("left", "0px")
             .style("background", "rgba(255,255,255,.4)");
@@ -128,9 +124,12 @@ function initLineChart(groups) {
     drawLineChart(groups);
 }
 
+// this function recalculates axes
 function resizeAxes(groups) {
     activeGroups = groups;
+    // x domain shouldn't change
     x.domain(d3.extent(groups[0].features[0].values, function(d) { return +d.date; }));
+    // for each group add its range to the dictionary of d3 scales and axes
     groups.map(function(group,i){
         var groupPadding = 10
         var groupHeight = height / groups.length;
@@ -146,9 +145,9 @@ function resizeAxes(groups) {
 }
 
  var currentScale;
+ // the custom line function for drawing on the different y-axes
 function line(d) {
         // find the correct y axis for this feature
-
         activeGroups.map(function(g,i) {
             g.features.map(function(f,fi) {
                 if (f.name === d.name) {
@@ -167,7 +166,6 @@ function line(d) {
 
 // draws the line chart view
 function drawLineChart(groupedCols) {
-    // console.log('doing chart');
 
     var groups = groupedCols.map(function (g) {
         var newG = Object.assign({},g)
@@ -177,7 +175,7 @@ function drawLineChart(groupedCols) {
 
     resizeAxes(groups);
 
-
+    // identity function for features
     function sourceIdentity (d, i) {
         var ret = d3.keys(initialSource[0]).indexOf(d.name); // initialSource is a global from index where the data gets loaded.
         return ret;
@@ -188,7 +186,6 @@ function drawLineChart(groupedCols) {
 
     var focusChartGroups = focus.select('.trellis-area').selectAll("g.chart").data(groups, function(g) {
         return g.name+"_"+g.features.length;
-        // return false;
     })
 
     focusChartGroups.exit().remove();
@@ -214,20 +211,20 @@ function drawLineChart(groupedCols) {
             header: "",
             values:{}
         };
+        // empty the tooltip
         $(".tt .tooltip-item-container").remove();
-            $(".tt").append("<div class='tooltip-item-container'></div>");
+        $(".tt").append("<div class='tooltip-item-container'></div>");
 
-
+        // find the nearest date from the mouse position
         var closestIndex = Math.floor(x.invert(d3.mouse(this)[0] - 5));
-        // console.log(d3.mouse(this)[0]);
-        // console.log(closestIndex);
         if (group.features[0].values[closestIndex] != undefined) {
+            // get all the values for the position
              for(var i = 0; i < group.features.length; i++) {
                 var currentFeature = group.features[i];
                 tooptipObj.header = currentFeature.values[closestIndex].date;
                 tooptipObj.values[currentFeature.name] = currentFeature.values[closestIndex];
             }
-
+            // fill the tooltip
             $(".tt .header").text(tooptipObj.header);
             Object.keys(tooptipObj.values).map(function(key,i){
                 var valueColor = color(key);
@@ -245,7 +242,7 @@ function drawLineChart(groupedCols) {
             $(".tt").css({display: 'none'})
         }
 
-
+        // move the vertical line
          vertical.style("display", "block")
          mousex = d3.mouse(this);
          mousex = mousex[0] + margin.left + 10;
@@ -281,24 +278,13 @@ function drawLineChart(groupedCols) {
 
 
     focusChartGroupsChartArea.select('g.plot-area').each(function(group){
-
         d3.select(this).selectAll('.context-line').remove();
-
-         // TODO needs to be redone for the trellis setup
+        // function for drawing a horizontal line on the right y-axis
          var contextLine = d3.line()
                 .y(function(d){ return yFocusScales[group.name](0)})
                 .x(function(d){ return x(+d.date)})
-
-        // // do context line
-        // focuslineGroups.selectAll('.context-line').remove();
-
-        // var zeroLine = focusChartGroupsChartArea.select('g.plot-area').selectAll('g.context-line')
         var zeroLine = focuslineGroups;
-
-
-
         if (group.range[0] < 0 && group.range[1] >= 0) {
-            // console.log('was in range here ^^');
             zeroLine.enter()
                         .append("g")
                         .attr("class","context-line")
@@ -308,13 +294,9 @@ function drawLineChart(groupedCols) {
                         .attr("d", function(d) { return contextLine(d.values); });
             zeroLine.exit().remove();
         } else {
-            // console.log(d3.select(this).selectAll('.context-line'));
             d3.select(this).selectAll('.context-line').remove();
         }
-
     });
-
-
 
     // do gridlines
     focusChartGroupsChartArea.select('.plot-area')
@@ -324,20 +306,20 @@ function drawLineChart(groupedCols) {
         .attr("class", "grid x")
         .attr("transform", function(group,i){
             var startPos = (height / groups.length + 5) *(i+1)
-            console.log(startPos)
             return "translate(0," + startPos + ")"
         })
         .each(function(group, i) {
             d3.select(this).call(
                 d3.axisBottom(x).ticks(10)
                     .tickSize(-height / groups.length + 5)
-                    .tickFormat(""));
+                    .tickFormat("")
+            );
+
+            // fudge factor for the divider
+            var heightOffset = 10 + (i-1)*4;
+
             if (i > 0) {
-                var heightOffset = 10 + (i-1)*4
-                if ( i == groups.length -1) {
-                    heightOffset = 10 + (i-1)*4
-                }
-                // d3.select(this).insert("g",":first-child").attr("class", "divider").attr
+                // insert the white divider bar between groups
                 d3.select(this).insert("rect",":first-child")
                 .style("fill","rgb(140,140,140)")
                     .attr("x", -10)
@@ -345,23 +327,24 @@ function drawLineChart(groupedCols) {
                     .attr("width", ccwidth+5)
                     .attr("height", 1);
             }
+
         });
 
-    // y gridlines
-    focusChartGroupsChartArea.select('.plot-area').append("g")
-        .attr("class", "grid y")
-        .each(function(group) {
-            d3.select(this).call(
-                d3.axisLeft(yFocusScales[group.name]).ticks(4)
-            .tickSize(-width)
-            .tickFormat(""));
+        // y gridlines
+        focusChartGroupsChartArea.select('.plot-area').append("g")
+            .attr("class", "grid y")
+            .each(function(group) {
+                d3.select(this).call(
+                    d3.axisLeft(yFocusScales[group.name]).ticks(4)
+                .tickSize(-width)
+                .tickFormat(""));
         });
 
+    // graph all lines to the same context viewfinder
     var contextlineGroups = context.select('.plot-area').selectAll("g")
         .data(groups)
         .enter().selectAll("g")
         .data(function(group){return group.features}, sourceIdentity);
-
 
     contextlineGroups
         .enter()
@@ -375,20 +358,17 @@ function drawLineChart(groupedCols) {
 
     contextlineGroups.exit().remove();
 
-
-
-
-    // focus.select(".y.axis").call(yAxis);
-
-   focus.select(".x.axis").transition().call(xAxis);
+    focus.select(".x.axis").transition().call(xAxis);
     context.select(".y.axis").call(yAxis);
     context.select(".x.axis").transition().call(xAxis2);
 
     brush();
 }
 
+// function for viewfinder brushing has cases for handling empty brush and for re initing brush on new groups
 var prevSelection;
 function brush() {
+    // timeout limiter to reduce lag from mass input
     var redrawLimiter = null;
     context.select('g.x.brush')
         .selectAll('rect')
@@ -405,15 +385,15 @@ function brush() {
             } else {
                 x.domain(x2.domain());
             }
-        } else {
+        } else { // change event is my custom event from the legend.
             if (prevSelection) {
-                selection = prevSelection;
+                console.log("brush here")
+                selection = prevSelection; // thus take the previous brush
                 x.domain(selection ? selection.map(x2.invert, x2) : x2.domain());
             } else {
                 x.domain(x2.domain());
             }
         }
-
         focus.selectAll("path.line").attr("d",  function(d) {return line(d)});
         focus.select(".x.axis").transition().call(xAxis);
         // focus.select(".y.axis").call(yAxis);

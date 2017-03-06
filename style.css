@@ -3,6 +3,7 @@ body {
     background-color: rgb(40,40,40);
     color:rgb(215,215,215);
     overflow:hidden;
+
 }
 svg {
   font: 10px sans-serif;
@@ -252,6 +253,9 @@ font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   .legend-wrapper {
     box-shadow: none;
+  }
+  body {
+    overflow:visible;
   }
 }
 
