@@ -158,7 +158,7 @@ function drawPcoords(groups) {
         .attr("y", -9)
         .attr("class", "header")
         .text(function (d, i) {
-            return d.name;
+            return d.name.split("_").join(" ");
         });
 
     // Add and store a brush for each axis.

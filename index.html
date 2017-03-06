@@ -72,7 +72,7 @@
 //            console.log(data);
             var legendState = {};
             d3.keys(data[0]).map(function (d,i) {
-                var initialCols = ['pr 5day MA', 'ex 5day ma', 'Predicted CumSum', 'Expected CumSum', 'T69_25-day_Adj._Close_MA', 'T69_50-day_Adj._Close_MA', 'T69_Adj._Volume', 'T69_Adj._Volume'];
+                var initialCols = ['pr AAPL 5-day MA', 'ex AAPL 5-day MA', 'ex AAPL cumulative sum', 'pr AAPL cumulative sum', 'AAPL_25-day_Adj._Close_MA', 'AAPL_50-day_Adj._Close_MA', 'AAPL_Adj._Volume'];
                 var initConditions = d=="Date" || initialCols.includes(d);
                 legendState[d] = initConditions ? true : null;
             });
@@ -135,6 +135,8 @@
                         var btn = d3.select(this).select('.filter-button');
 
                         d3.select(this).attr("class", function (d, i) {
+                        console.log(legendState[d.name])
+
                             var classes = ['form-check'];
                             if (!btn.attr('checked')) {
                                 classes.push('active')

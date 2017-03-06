@@ -53,7 +53,8 @@ var line2 = d3.line()
 var svg = null,
     focus = null,
     context = null,
-    tooltip = null;
+    tooltip = null,
+    vertical;
 
 
 
@@ -88,6 +89,17 @@ function initLineChart(groups) {
 
     tooltip = d3.select(".chart-container").append("div").attr("class", "tt").append("h5").attr("class", "header");
 
+    vertical = d3.select(".chart-container")
+            .append("div")
+            // .attr("class", "remove")
+            .style("position", "absolute")
+            .style("z-index", "1")
+            .style("width", "1px")
+            // .style("height", "380px")
+            .style("top", "10px")
+            .style("bottom", "110px")
+            .style("left", "0px")
+            .style("background", "rgba(255,255,255,.4)");
 
     context.append("g")
         .attr("class", "x axis")
@@ -233,10 +245,21 @@ function drawLineChart(groupedCols) {
             $(".tt").css({display: 'none'})
         }
 
+
+         vertical.style("display", "block")
+         mousex = d3.mouse(this);
+         mousex = mousex[0] + margin.left + 10;
+         vertical.style("left", mousex + "px" )
+
     }).on("mouseover", function(group){
         $(".tt").css({display: 'block'})
+        vertical.style("display", "block")
+        mousex = d3.mouse(this);
+        mousex = mousex[0] + margin.left + 10;
+        vertical.style("left", mousex + "px")
     }).on("mouseout", function(group){
         $(".tt").css({display: 'none'})
+         vertical.style("display", "none")
     })
 
 
