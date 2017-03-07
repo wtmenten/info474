@@ -387,9 +387,10 @@ function brush() {
             }
         } else { // change event is my custom event from the legend.
             if (prevSelection) {
-                console.log("brush here")
                 selection = prevSelection; // thus take the previous brush
-                x.domain(selection ? selection.map(x2.invert, x2) : x2.domain());
+                x.domain(prevSelection ? prevSelection.map(x2.invert, x2) : x2.domain);
+                context.select(".brush").call(xbrush.move, prevSelection);
+
             } else {
                 x.domain(x2.domain());
             }
